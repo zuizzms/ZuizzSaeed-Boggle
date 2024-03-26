@@ -96,8 +96,12 @@ class GameplayFragment : Fragment() {
             } else {
                 Toast.makeText(requireContext(), "You may only use each letter once!", Toast.LENGTH_SHORT).show()
             }
+        } else {
+            Toast.makeText(requireContext(), "Letters must be adjacent!", Toast.LENGTH_SHORT).show()
         }
     }
+
+
 
     private fun countVowels(word: String): Int {
         val vowels = "AEIOUaeiou"
@@ -111,12 +115,36 @@ class GameplayFragment : Fragment() {
     }
 
     private fun isAdjacent(button1: Button, button2: Button): Boolean {
-        val index1 = button1.text.toString().toInt()
-        val index2 = button2.text.toString().toInt()
+        val index1 = getIndex(button1)
+        val index2 = getIndex(button2)
         val col1 = index1 % 4
         val row1 = index1 / 4
         val col2 = index2 % 4
         val row2 = index2 / 4
-        return abs(col1 - col2) <= 1 && Math.abs(row1 - row2) <= 1
+        return abs(col1 - col2) <= 1 && abs(row1 - row2) <= 1
     }
+
+    private fun getIndex(button: Button): Int {
+        val id = button.id
+        return when (id) {
+            R.id.button1 -> 0
+            R.id.button2 -> 1
+            R.id.button3 -> 2
+            R.id.button4 -> 3
+            R.id.button5 -> 4
+            R.id.button6 -> 5
+            R.id.button7 -> 6
+            R.id.button8 -> 7
+            R.id.button9 -> 8
+            R.id.button10 -> 9
+            R.id.button11 -> 10
+            R.id.button12 -> 11
+            R.id.button13 -> 12
+            R.id.button14 -> 13
+            R.id.button15 -> 14
+            R.id.button16 -> 15
+            else -> throw IllegalArgumentException("Unknown button ID")
+        }
+    }
+
 }
