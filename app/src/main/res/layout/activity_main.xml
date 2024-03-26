@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <!-- 4x4 Grid Layout for Letter Buttons -->
+    <GridLayout
+        android:id="@+id/gridLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="10dp"
+        android:alignmentMode="alignMargins"
+        android:columnCount="4"
+        android:columnOrderPreserved="false"
+        android:orientation="horizontal"
+        android:rowCount="4"
+        android:useDefaultMargins="true">
+
+        <!-- Define 16 Buttons for Letters -->
+
+        <!-- Row 1 -->
+        <Button
+            android:id="@+id/button1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_rowWeight="1"
+            android:text="A"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/button2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_rowWeight="1"
+            android:text="B"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/button3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_rowWeight="1"
+            android:text="C"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/button4"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_rowWeight="1"
+            android:text="D"
+            android:textAllCaps="false" />
+
+        <!-- Row 2 -->
+        <Button
+            android:id="@+id/button5"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_rowWeight="1"
+            android:text="E"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/button6"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_rowWeight="1"
+            android:text="F"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/button7"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_rowWeight="1"
+            android:text="G"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/button8"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_rowWeight="1"
+            android:text="H"
+            android:textAllCaps="false" />
+
+        <!-- Row 3 -->
+        <Button
+            android:id="@+id/button9"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_rowWeight="1"
+            android:text="I"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/button10"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_rowWeight="1"
+            android:text="J"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/button11"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_rowWeight="1"
+            android:text="K"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/button12"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_rowWeight="1"
+            android:text="L"
+            android:textAllCaps="false" />
+
+        <!-- Row 4 -->
+        <Button
+            android:id="@+id/button13"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_rowWeight="1"
+            android:text="M"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/button14"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_rowWeight="1"
+            android:text="N"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/button15"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_rowWeight="1"
+            android:text="O"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/button16"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_rowWeight="1"
+            android:text="P"
+            android:textAllCaps="false" />
+
+    </GridLayout>
+
+    <!-- Clear and Submit Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@id/gridLayout"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/buttonClear"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Clear" />
+
+        <Button
+            android:id="@+id/buttonSubmit"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Submit" />
+
+    </LinearLayout>
+
+</RelativeLayout>
