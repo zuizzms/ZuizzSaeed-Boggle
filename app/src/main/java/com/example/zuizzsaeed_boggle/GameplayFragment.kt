@@ -1,6 +1,4 @@
 package com.example.zuizzsaeed_boggle
-
-import android.widget.GridLayout
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,19 +6,24 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import android.widget.GridLayout
 import java.util.*
+import kotlin.math.abs
 
 class GameplayFragment : Fragment() {
-    // Interface for communication with activity
+
     interface OnGameplayInteractionListener {
         fun onLettersEntered(letters: String)
         fun updateScore(score: Int)
     }
 
-
     private var interactionListener: OnGameplayInteractionListener? = null
     private lateinit var enteredLettersTextView: TextView
+    private var lastPressedButton: Button? = null
+    private val selectedIndices = HashSet<Int>()
+    private var currentScore = 0
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -52,7 +55,7 @@ class GameplayFragment : Fragment() {
             button?.text = letter // Assign a random letter to each button
             // Set click listener for the button
             button?.setOnClickListener {
-                appendEnteredLetter(letter)
+                handleButtonClick(button, letter, i)
             }
         }
 
@@ -64,28 +67,56 @@ class GameplayFragment : Fragment() {
         // Set click listener for the Submit button
         view.findViewById<Button>(R.id.buttonSubmit).setOnClickListener {
             val enteredLetters = enteredLettersTextView.text.toString()
-            interactionListener?.onLettersEntered(enteredLetters)
-            interactionListener?.updateScore(10) // Adding 10 points to the score
+            if (enteredLetters.length >= 4 && countVowels(enteredLetters) >= 2) {
+                interactionListener?.onLettersEntered(enteredLetters)
+            } else {
+                Toast.makeText(requireContext(), "A word must be at least 4 characters long and contain at least two vowels!", Toast.LENGTH_SHORT).show()
+                // Decrement the score by 10 if the word is invalid
+                currentScore -= 10
+                interactionListener?.updateScore(currentScore)
+            }
         }
 
         return view
     }
 
-    // Function to get a random letter from the alphabet
     private fun getRandomLetter(): String {
         val alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         val random = Random()
         return alphabet[random.nextInt(alphabet.length)].toString()
     }
 
-    // Function to append a letter to the entered letters text
-    private fun appendEnteredLetter(letter: String) {
+    private fun handleButtonClick(button: Button, letter: String, index: Int) {
         val enteredText = enteredLettersTextView.text.toString()
-        enteredLettersTextView.text = "$enteredText$letter"
+        if (lastPressedButton == null || isAdjacent(lastPressedButton!!, button)) {
+            if (!selectedIndices.contains(index)) {
+                enteredLettersTextView.text = "$enteredText$letter"
+                lastPressedButton = button
+                selectedIndices.add(index)
+            } else {
+                Toast.makeText(requireContext(), "You may only use each letter once!", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
-    // Function to clear the entered letters
+    private fun countVowels(word: String): Int {
+        val vowels = "AEIOUaeiou"
+        return word.count { vowels.contains(it) }
+    }
+
     private fun clearEnteredLetters() {
         enteredLettersTextView.text = ""
+        lastPressedButton = null
+        selectedIndices.clear()
+    }
+
+    private fun isAdjacent(button1: Button, button2: Button): Boolean {
+        val index1 = button1.text.toString().toInt()
+        val index2 = button2.text.toString().toInt()
+        val col1 = index1 % 4
+        val row1 = index1 / 4
+        val col2 = index2 % 4
+        val row2 = index2 / 4
+        return abs(col1 - col2) <= 1 && Math.abs(row1 - row2) <= 1
     }
 }
