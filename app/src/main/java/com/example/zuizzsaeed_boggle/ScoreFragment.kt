@@ -28,7 +28,7 @@ class ScoreFragment : Fragment() {
 
     // Update the score displayed in the score text view
     fun updateScore(score: Int) {
-        currentScore = score
-        scoreTextView.text = "Score: $score"
+        currentScore += score
+        scoreTextView.text = "Score: $currentScore"
     }
 }

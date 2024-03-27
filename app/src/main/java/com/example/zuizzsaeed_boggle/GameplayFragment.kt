@@ -48,6 +48,18 @@ class GameplayFragment : Fragment() {
         // Find the TextView for entered letters
         enteredLettersTextView = view.findViewById(R.id.textEnteredLetters)
 
+        // Set click listener for the Clear button
+        view.findViewById<Button>(R.id.buttonClear).setOnClickListener {
+            clearEnteredLetters()
+        }
+
+        // Set click listener for the Submit button
+        view.findViewById<Button>(R.id.buttonSubmit).setOnClickListener {
+            val enteredLetters = enteredLettersTextView.text.toString()
+            val score = calculateScore(enteredLetters)
+            interactionListener?.updateScore(score)
+        }
+
         // Iterate over buttons and assign random letters
         for (i in 0 until gridLayout.childCount) {
             val button = gridLayout.getChildAt(i) as? Button
@@ -59,26 +71,32 @@ class GameplayFragment : Fragment() {
             }
         }
 
-        // Set click listener for the Clear button
-        view.findViewById<Button>(R.id.buttonClear).setOnClickListener {
-            clearEnteredLetters()
-        }
-
-        // Set click listener for the Submit button
-        view.findViewById<Button>(R.id.buttonSubmit).setOnClickListener {
-            val enteredLetters = enteredLettersTextView.text.toString()
-            if (enteredLetters.length >= 4 && countVowels(enteredLetters) >= 2) {
-                interactionListener?.onLettersEntered(enteredLetters)
-            } else {
-                Toast.makeText(requireContext(), "A word must be at least 4 characters long and contain at least two vowels!", Toast.LENGTH_SHORT).show()
-                // Decrement the score by 10 if the word is invalid
-                currentScore -= 10
-                interactionListener?.updateScore(currentScore)
-            }
-        }
-
         return view
     }
+
+    private fun calculateScore(word: String): Int {
+        val consonantsWorthOne = "BCDFGHJKLMNPQRSTVWXYZ"
+        val consonantsWorthDouble = "SZPXQ"
+        val vowels = "AEIOU"
+        var containsConsonantsWorthDouble: Boolean = false
+
+        var score = 0
+        for (letter in word) {
+            if (letter in consonantsWorthDouble) {
+                containsConsonantsWorthDouble = true
+            }
+            if (letter in consonantsWorthOne) {
+                score += 1
+            } else if (letter in vowels) {
+                score += 5 // Vowels are worth 5 points
+            }
+        }
+        if (containsConsonantsWorthDouble) {
+            score *= 2
+        }
+        return score
+    }
+
 
     private fun getRandomLetter(): String {
         val alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -109,10 +127,11 @@ class GameplayFragment : Fragment() {
     }
 
     private fun clearEnteredLetters() {
-        enteredLettersTextView.text = ""
+        enteredLettersTextView.text = "Entered Letters: "
         lastPressedButton = null
         selectedIndices.clear()
     }
+
 
     private fun isAdjacent(button1: Button, button2: Button): Boolean {
         val index1 = getIndex(button1)
