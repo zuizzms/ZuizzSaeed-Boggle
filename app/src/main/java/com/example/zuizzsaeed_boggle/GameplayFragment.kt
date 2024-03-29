@@ -13,6 +13,9 @@ import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import java.util.Locale
 import kotlin.math.abs
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class GameplayFragment : Fragment() {
 
@@ -25,6 +28,7 @@ class GameplayFragment : Fragment() {
     private var lastClickedButtonIndex: Int = -1
     private val vowels = listOf('A', 'E', 'I', 'O', 'U')
     private val specialConsonants = listOf('S', 'Z', 'P', 'X', 'Q')
+    private val dictionaryWords = mutableSetOf<String>()
 
     interface OnGameplayInteractionListener {
         fun updateScore(score: Int)
@@ -42,6 +46,7 @@ class GameplayFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_gameplay, container, false)
         setupUi(view)
+        loadDictionaryWords()
         return view
     }
 
@@ -81,6 +86,7 @@ class GameplayFragment : Fragment() {
         }
     }
 
+
     private fun handleLetterButtonClick(button: Button, index: Int) {
         if (!selectedButtonIndices.contains(index)) {
             selectedLetters.append(button.text)
@@ -101,23 +107,29 @@ class GameplayFragment : Fragment() {
 
     private fun submitWord() {
         val word = selectedLetters.toString().uppercase()
-        if (word.length >= 4 && word.count { it in vowels } >= 2) {
-            if (word in foundWords) {
-                Toast.makeText(context, "This word has already been found.", Toast.LENGTH_SHORT).show()
-            } else {
-                // Calculate the score using map and sum, to avoid sumOf ambiguity
-                val score = word.map { char ->
-                    if (char in vowels) 5 else 1
-                }.sum() * if (word.any { it in specialConsonants }) 2 else 1
+        if (dictionaryWords.contains(word)) {
+            if (word.length >= 4 && word.count { it in vowels } >= 2) {
+                if (word in foundWords) {
+                    Toast.makeText(context, "This word has already been found.", Toast.LENGTH_SHORT).show()
+                } else {
+                    // Calculate the score using map and sum, to avoid sumOf ambiguity
+                    val score = word.map { char ->
+                        if (char in vowels) 5 else 1
+                    }.sum() * if (word.any { it in specialConsonants }) 2 else 1
 
-                listener?.updateScore(score)
-                Toast.makeText(context, "Points awarded: $score", Toast.LENGTH_SHORT).show()
-                foundWords.add(word)
+                    listener?.updateScore(score)
+                    Toast.makeText(context, "Points awarded: $score", Toast.LENGTH_SHORT).show()
+                    foundWords.add(word)
+                }
+            } else {
+                Toast.makeText(context, "Word must be at least 4 letters long and contain at least 2 vowels", Toast.LENGTH_SHORT).show()
             }
         } else {
-            Toast.makeText(context, "Word must be at least 4 letters long and contain at least 2 vowels", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "$word is not in the dictionary. 10 points subtracted!", Toast.LENGTH_LONG).show()
+            listener?.updateScore(-10)
         }
         clearEnteredLetters()
+
     }
 
 
@@ -130,6 +142,17 @@ class GameplayFragment : Fragment() {
         return abs(row1 - row2) <= 1 && abs(col1 - col2) <= 1
     }
 
+    private fun loadDictionaryWords() {
+        GlobalScope.launch(Dispatchers.IO) {
+            try {
+                val inputStream = requireContext().assets.open("dictionary.txt")
+                inputStream.bufferedReader().forEachLine { line ->
+                    dictionaryWords.add(line.toUpperCase())
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        } }
     override fun onDetach() {
         super.onDetach()
         listener = null
