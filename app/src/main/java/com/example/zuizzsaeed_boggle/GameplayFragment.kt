@@ -1,169 +1,137 @@
 package com.example.zuizzsaeed_boggle
+
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.GridLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.view.children
 import androidx.fragment.app.Fragment
-import android.widget.GridLayout
-import java.util.*
+import java.util.Locale
 import kotlin.math.abs
 
 class GameplayFragment : Fragment() {
 
+    private var listener: OnGameplayInteractionListener? = null
+    private lateinit var gridLayout: GridLayout
+    private lateinit var textEnteredLetters: TextView
+    private val selectedLetters = StringBuilder()
+    private val selectedButtonIndices = mutableListOf<Int>()
+    private val foundWords = mutableSetOf<String>()
+    private var lastClickedButtonIndex: Int = -1
+    private val vowels = listOf('A', 'E', 'I', 'O', 'U')
+    private val specialConsonants = listOf('S', 'Z', 'P', 'X', 'Q')
+
     interface OnGameplayInteractionListener {
-        fun onLettersEntered(letters: String)
         fun updateScore(score: Int)
     }
-
-    private var interactionListener: OnGameplayInteractionListener? = null
-    private lateinit var enteredLettersTextView: TextView
-    private var lastPressedButton: Button? = null
-    private val selectedIndices = HashSet<Int>()
-    private var currentScore = 0
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
         if (context is OnGameplayInteractionListener) {
-            interactionListener = context
+            listener = context
         } else {
             throw RuntimeException("$context must implement OnGameplayInteractionListener")
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_gameplay, container, false)
-
-        // Get the grid layout
-        val gridLayout = view.findViewById<GridLayout>(R.id.gridLayout)
-
-        // Find the TextView for entered letters
-        enteredLettersTextView = view.findViewById(R.id.textEnteredLetters)
-
-        // Set click listener for the Clear button
-        view.findViewById<Button>(R.id.buttonClear).setOnClickListener {
-            clearEnteredLetters()
-        }
-
-        // Set click listener for the Submit button
-        view.findViewById<Button>(R.id.buttonSubmit).setOnClickListener {
-            val enteredLetters = enteredLettersTextView.text.toString()
-            val score = calculateScore(enteredLetters)
-            interactionListener?.updateScore(score)
-        }
-
-        // Iterate over buttons and assign random letters
-        for (i in 0 until gridLayout.childCount) {
-            val button = gridLayout.getChildAt(i) as? Button
-            val letter = getRandomLetter()
-            button?.text = letter // Assign a random letter to each button
-            // Set click listener for the button
-            button?.setOnClickListener {
-                handleButtonClick(button, letter, i)
-            }
-        }
-
+        setupUi(view)
         return view
     }
 
-    private fun calculateScore(word: String): Int {
-        val consonantsWorthOne = "BCDFGHJKLMNPQRSTVWXYZ"
-        val consonantsWorthDouble = "SZPXQ"
-        val vowels = "AEIOU"
-        var containsConsonantsWorthDouble: Boolean = false
+    private fun setupUi(view: View) {
+        gridLayout = view.findViewById(R.id.gridLayout)
+        textEnteredLetters = view.findViewById(R.id.textEnteredLetters)
 
-        var score = 0
-        for (letter in word) {
-            if (letter in consonantsWorthDouble) {
-                containsConsonantsWorthDouble = true
-            }
-            if (letter in consonantsWorthOne) {
-                score += 1
-            } else if (letter in vowels) {
-                score += 5 // Vowels are worth 5 points
+        val buttonIds = listOf(
+            R.id.button1, R.id.button2, R.id.button3, R.id.button4,
+            R.id.button5, R.id.button6, R.id.button7, R.id.button8,
+            R.id.button9, R.id.button10, R.id.button11, R.id.button12,
+            R.id.button13, R.id.button14, R.id.button15, R.id.button16
+        )
+
+        buttonIds.forEachIndexed { index, buttonId ->
+            val button = view.findViewById<Button>(buttonId)
+            button.setOnClickListener {
+                if (lastClickedButtonIndex == -1 || isAdjacent(lastClickedButtonIndex, index)) {
+                    handleLetterButtonClick(it as Button, index)
+                } else {
+                    Toast.makeText(context, "Please click an adjacent button", Toast.LENGTH_SHORT).show()
+                }
             }
         }
-        if (containsConsonantsWorthDouble) {
-            score *= 2
+
+        view.findViewById<Button>(R.id.buttonClear).setOnClickListener { clearEnteredLetters() }
+        view.findViewById<Button>(R.id.buttonSubmit).setOnClickListener { submitWord() }
+
+        generateGrid()
+    }
+
+    private fun generateGrid() {
+        val letters = (listOf('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z') - vowels).shuffled().take(12) + vowels.shuffled().take(4)
+        val gridButtons = gridLayout.children.toList().filterIsInstance<Button>()
+        letters.shuffled().forEachIndexed { index, c ->
+            gridButtons[index].text = c.toString()
         }
-        return score
     }
 
-
-    private fun getRandomLetter(): String {
-        val alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        val random = Random()
-        return alphabet[random.nextInt(alphabet.length)].toString()
-    }
-
-    private fun handleButtonClick(button: Button, letter: String, index: Int) {
-        val enteredText = enteredLettersTextView.text.toString()
-        if (lastPressedButton == null || isAdjacent(lastPressedButton!!, button)) {
-            if (!selectedIndices.contains(index)) {
-                enteredLettersTextView.text = "$enteredText$letter"
-                lastPressedButton = button
-                selectedIndices.add(index)
-            } else {
-                Toast.makeText(requireContext(), "You may only use each letter once!", Toast.LENGTH_SHORT).show()
-            }
+    private fun handleLetterButtonClick(button: Button, index: Int) {
+        if (!selectedButtonIndices.contains(index)) {
+            selectedLetters.append(button.text)
+            textEnteredLetters.text = "Entered Letters: ${selectedLetters.toString()}"
+            lastClickedButtonIndex = index
+            selectedButtonIndices.add(index)
         } else {
-            Toast.makeText(requireContext(), "Letters must be adjacent!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Each letter can only be used once per word.", Toast.LENGTH_SHORT).show()
         }
-    }
-
-
-
-    private fun countVowels(word: String): Int {
-        val vowels = "AEIOUaeiou"
-        return word.count { vowels.contains(it) }
     }
 
     private fun clearEnteredLetters() {
-        enteredLettersTextView.text = "Entered Letters: "
-        lastPressedButton = null
-        selectedIndices.clear()
+        selectedLetters.clear()
+        textEnteredLetters.text = "Entered Letters: "
+        lastClickedButtonIndex = -1
+        selectedButtonIndices.clear()
     }
 
+    private fun submitWord() {
+        val word = selectedLetters.toString().uppercase()
+        if (word.length >= 4 && word.count { it in vowels } >= 2) {
+            if (word in foundWords) {
+                Toast.makeText(context, "This word has already been found.", Toast.LENGTH_SHORT).show()
+            } else {
+                // Calculate the score using map and sum, to avoid sumOf ambiguity
+                val score = word.map { char ->
+                    if (char in vowels) 5 else 1
+                }.sum() * if (word.any { it in specialConsonants }) 2 else 1
 
-    private fun isAdjacent(button1: Button, button2: Button): Boolean {
-        val index1 = getIndex(button1)
-        val index2 = getIndex(button2)
-        val col1 = index1 % 4
-        val row1 = index1 / 4
-        val col2 = index2 % 4
-        val row2 = index2 / 4
-        return abs(col1 - col2) <= 1 && abs(row1 - row2) <= 1
-    }
-
-    private fun getIndex(button: Button): Int {
-        val id = button.id
-        return when (id) {
-            R.id.button1 -> 0
-            R.id.button2 -> 1
-            R.id.button3 -> 2
-            R.id.button4 -> 3
-            R.id.button5 -> 4
-            R.id.button6 -> 5
-            R.id.button7 -> 6
-            R.id.button8 -> 7
-            R.id.button9 -> 8
-            R.id.button10 -> 9
-            R.id.button11 -> 10
-            R.id.button12 -> 11
-            R.id.button13 -> 12
-            R.id.button14 -> 13
-            R.id.button15 -> 14
-            R.id.button16 -> 15
-            else -> throw IllegalArgumentException("Unknown button ID")
+                listener?.updateScore(score)
+                Toast.makeText(context, "Points awarded: $score", Toast.LENGTH_SHORT).show()
+                foundWords.add(word)
+            }
+        } else {
+            Toast.makeText(context, "Word must be at least 4 letters long and contain at least 2 vowels", Toast.LENGTH_SHORT).show()
         }
+        clearEnteredLetters()
     }
 
+
+
+    private fun isAdjacent(pos1: Int, pos2: Int): Boolean {
+        val row1 = pos1 / 4
+        val col1 = pos1 % 4
+        val row2 = pos2 / 4
+        val col2 = pos2 % 4
+        return abs(row1 - row2) <= 1 && abs(col1 - col2) <= 1
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        listener = null
+    }
 }

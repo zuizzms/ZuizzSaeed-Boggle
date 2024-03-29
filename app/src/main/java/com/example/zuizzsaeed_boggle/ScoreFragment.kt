@@ -1,4 +1,5 @@
 package com.example.zuizzsaeed_boggle
+
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,8 +9,8 @@ import androidx.fragment.app.Fragment
 
 class ScoreFragment : Fragment() {
 
-    private lateinit var scoreTextView: TextView
-    private var currentScore: Int = 0
+    private lateinit var textScore: TextView
+    private var score: Int = 0
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -17,18 +18,29 @@ class ScoreFragment : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_score, container, false)
-
-        // Initialize score text view
-        scoreTextView = view.findViewById(R.id.textScore)
-        updateScore(currentScore)
-
-        // Return the inflated layout
+        textScore = view.findViewById(R.id.textScore)
+        updateDisplay()
         return view
     }
 
-    // Update the score displayed in the score text view
-    fun updateScore(score: Int) {
-        currentScore += score
-        scoreTextView.text = "Score: $currentScore"
+    fun updateScore(points: Int) {
+        score += points
+        updateDisplay()
+    }
+
+    fun resetScore() {
+        score = 0
+        updateDisplay()
+    }
+
+    private fun updateDisplay() {
+        activity?.runOnUiThread {
+            textScore.text = "Score: $score"
+        }
+    }
+
+    companion object {
+        @JvmStatic
+        fun newInstance() = ScoreFragment()
     }
 }

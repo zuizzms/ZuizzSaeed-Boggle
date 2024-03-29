@@ -22,10 +22,6 @@ class MainActivity : AppCompatActivity(), GameplayFragment.OnGameplayInteraction
             .commit()
     }
 
-    override fun onLettersEntered(letters: String) {
-        // Logic to handle letters entered by the user
-        // This method will be called from the GameplayFragment
-    }
 
     override fun updateScore(score: Int) {
         // Update score in the ScoreFragment
