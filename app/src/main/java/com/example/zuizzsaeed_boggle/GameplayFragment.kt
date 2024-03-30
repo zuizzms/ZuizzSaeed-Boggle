@@ -106,31 +106,38 @@ class GameplayFragment : Fragment() {
     }
 
     private fun submitWord() {
-        val word = selectedLetters.toString().uppercase()
-        if (dictionaryWords.contains(word)) {
-            if (word.length >= 4 && word.count { it in vowels } >= 2) {
-                if (word in foundWords) {
-                    Toast.makeText(context, "This word has already been found.", Toast.LENGTH_SHORT).show()
-                } else {
-                    // Calculate the score using map and sum, to avoid sumOf ambiguity
+        val word = selectedLetters.toString().uppercase(Locale.getDefault())
+
+        // First, check if the word meets the length and vowel requirements
+        if (word.length >= 4 && word.count { it in vowels } >= 2) {
+            // Next, check if the word has already been found
+            if (word in foundWords) {
+                Toast.makeText(context, "This word has already been found.", Toast.LENGTH_SHORT).show()
+            } else {
+                // Then, check if the word is in the dictionary
+                if (dictionaryWords.contains(word)) {
+                    // Calculate the score for a valid word
                     val score = word.map { char ->
                         if (char in vowels) 5 else 1
                     }.sum() * if (word.any { it in specialConsonants }) 2 else 1
 
-                    listener?.updateScore(score)
+                    listener?.updateScore(score) // Notify the listener to update the score
                     Toast.makeText(context, "Points awarded: $score", Toast.LENGTH_SHORT).show()
-                    foundWords.add(word)
+                    foundWords.add(word) // Add the word to the set of found words
+                } else {
+                    // If the word is not in the dictionary, subtract points and notify the user
+                    Toast.makeText(context, "$word is not in the dictionary. 10 points subtracted!", Toast.LENGTH_LONG).show()
+                    listener?.updateScore(-10)
                 }
-            } else {
-                Toast.makeText(context, "Word must be at least 4 letters long and contain at least 2 vowels", Toast.LENGTH_SHORT).show()
             }
         } else {
-            Toast.makeText(context, "$word is not in the dictionary. 10 points subtracted!", Toast.LENGTH_LONG).show()
-            listener?.updateScore(-10)
+            // If the word does not meet the length and vowel requirements, notify the user
+            Toast.makeText(context, "Word must be at least 4 letters long and contain at least 2 vowels", Toast.LENGTH_SHORT).show()
         }
-        clearEnteredLetters()
 
+        clearEnteredLetters() // Clear the current selection of letters
     }
+
 
 
 
@@ -147,7 +154,7 @@ class GameplayFragment : Fragment() {
             try {
                 val inputStream = requireContext().assets.open("dictionary.txt")
                 inputStream.bufferedReader().forEachLine { line ->
-                    dictionaryWords.add(line.toUpperCase())
+                    dictionaryWords.add(line.uppercase())
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
