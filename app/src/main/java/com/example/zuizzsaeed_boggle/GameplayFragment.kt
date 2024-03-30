@@ -160,6 +160,11 @@ class GameplayFragment : Fragment() {
                 e.printStackTrace()
             }
         } }
+    fun newGame() {
+        generateGrid()
+        foundWords.clear()
+        clearEnteredLetters() // Assuming this clears the UI correctly
+    }
     override fun onDetach() {
         super.onDetach()
         listener = null
