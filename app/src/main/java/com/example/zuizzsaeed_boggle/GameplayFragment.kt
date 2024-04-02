@@ -67,7 +67,7 @@ class GameplayFragment : Fragment() {
                 if (lastClickedButtonIndex == -1 || isAdjacent(lastClickedButtonIndex, index)) {
                     handleLetterButtonClick(it as Button, index)
                 } else {
-                    Toast.makeText(context, "Please click an adjacent button", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireActivity(), "Please click an adjacent button", Toast.LENGTH_SHORT).show()
                 }
             }
         }

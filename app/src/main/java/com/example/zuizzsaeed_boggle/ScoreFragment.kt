@@ -20,6 +20,7 @@ class ScoreFragment : Fragment() {
 
     private var newGameListener: OnNewGameListener? = null
 
+
     override fun onAttach(context: Context) {
         super.onAttach(context)
         newGameListener = context as? OnNewGameListener
